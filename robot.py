@@ -17,7 +17,6 @@ from informer import Informer
 def parse_cmd(message):
     print("Get cmd:", message)
 
-
 class Client(Informer):
     def send_img(self, message):
         self.send(message, 'img')
@@ -85,7 +84,7 @@ def callback_img(ros_img):
 if __name__ == '__main__':
     ifm = Client(config = 'config.yaml')
 
-    rospy.init_node('drone-5g-transfer', anonymous=True)
+    rospy.init_node('drone_5g_transfer', anonymous=True)
     rospy.Subscriber('/camera/color/image_raw', Image, callback_img)
     rospy.Subscriber('/mavros/altitude', Altitude, callback_altitude)
     rospy.Subscriber('/mavros/battery', BatteryState, callback_battery)
