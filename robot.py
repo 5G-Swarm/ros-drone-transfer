@@ -7,7 +7,7 @@ import time
 import rospy
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist, Vector3
-from sensor_msgs.msg import Image, BatteryState, Imu
+from sensor_msgs.msg import Image, BatteryState, Imu,NavSatFix
 from mavros_msgs.msg import Altitude#, EstimatorStatus
 from geometry_msgs.msg import TwistStamped
 from nav_msgs.msg import Odometry
@@ -24,20 +24,23 @@ class Client(Informer):
     def cmd_recv(self):
         self.recv('cmd', parse_cmd)
 
-def callback_altitude(ros_altitude):
-    _ = ros_altitude.amsl
+def callback_gps_pos(ros_gps_pos):
+    _ = ros_gps_pos.altitude
+    _ = ros_gps_pos.latitude
+    _ = ros_gps_pos.longtitude
+    
+
 
 def callback_battery(ros_battery):
     _ = ros_battery.cell_voltage
     _ = ros_battery.percentage
 
+
 def callback_gps_vel(ros_gps_vel):
     _ = ros_gps_vel.twist.linear.x
     _ = ros_gps_vel.twist.linear.y
     _ = ros_gps_vel.twist.linear.z
-    _ = ros_gps_vel.twist.angular.x
-    _ = ros_gps_vel.twist.angular.y
-    _ = ros_gps_vel.twist.angular.z
+
     
 def callback_imu(ros_imu):
     _ = ros_imu.angular_velocity.x
@@ -86,7 +89,7 @@ if __name__ == '__main__':
 
     rospy.init_node('drone_5g_transfer', anonymous=True)
     rospy.Subscriber('/camera/color/image_raw', Image, callback_img)
-    rospy.Subscriber('/mavros/altitude', Altitude, callback_altitude)
+    rospy.Subscriber('/mavros/global_position/global', NavSatFix, callback_gps_pos)
     rospy.Subscriber('/mavros/battery', BatteryState, callback_battery)
     rospy.Subscriber('/mavros/global_position/raw/gps_vel', TwistStamped, callback_gps_vel)
     rospy.Subscriber('/mavros/imu/data', Imu, callback_imu)
