@@ -1,8 +1,10 @@
 debug_mode: False
+use_log: True
+robot_id: 3  # 0-9
 
 role_info:
     is_client: True
-    id: 'drone-01'
+    id: 'vehicle-01'
 
 network_info:
     ip: '127.0.0.1'
@@ -12,20 +14,14 @@ network_info:
         ip: '127.0.0.1'
 
 message_info:
-    msg:
+    state:
         is_tcp: True
-        port: 10001
-    odm:
-        is_tcp: True
-        port: 10002
-    path:
-        is_tcp: True
-        port: 10003
-    cmd:
-        is_tcp: True
-        port: 10004
+        port: 31000
     img:
         is_tcp: True
-        port: 10005
+        port: 32000
         width: 640
         height: 480
+    cmd:
+        is_tcp: True
+        port: 33000
