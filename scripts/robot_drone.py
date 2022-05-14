@@ -12,6 +12,9 @@ from proto.python_out import drone_state_msgs_pb2
 
 from informer import Informer
 
+gps_time = None
+local_time = None
+
 def parse_cmd(message, robot_id):
     print("Get cmd:", message)
 
@@ -26,11 +29,21 @@ class Client(Informer):
         self.recv('cmd', parse_cmd)
 
 def callback_syn(ros_gps_pos,ros_gps_vel,ros_imu,ros_local_vel):
-    global ifm
+    global ifm, gps_time, local_time
     # global drone_syn_pub
     gps_imu = drone_state_msgs_pb2.DroneState()
     # drone_syn = DroneSyn()
-    temp = ""
+    # temp = ""
+    # print(ros_gps_pos.header.stamp.secs,
+    # ros_gps_pos.header.stamp.nsecs, type(ros_gps_pos.header.stamp.secs))
+    local_time = time.time()
+    gps_time = ros_gps_pos.header.stamp.secs * 1000000000 + ros_gps_pos.header.stamp.nsecs
+    ts_bytes = str(gps_time).ljust(19, "0").encode()
+    # print(ros_gps_pos.header.stamp.secs, ros_gps_pos.header.stamp.nsecs, gps_time)
+    # gps_time_bytes = str(gps_time).ljust(19, "0").encode()
+    # print(gps_time_bytes)
+    # print(gps_time, int(local_time*1000000000))
+
     gps_imu.gps.lon_x = ros_gps_pos.longitude
     gps_imu.gps.lat_y = ros_gps_pos.latitude
     gps_imu.gps.alt_z = ros_gps_pos.altitude
@@ -49,16 +62,23 @@ def callback_syn(ros_gps_pos,ros_gps_vel,ros_imu,ros_local_vel):
     gps_imu.imu.w_z = ros_imu.angular_velocity.z
     sent_data = gps_imu.SerializeToString()
     # drone_syn_pub.publish(drone_syn)
-    ifm.send_state(sent_data)
-    # print("finish",drone_syn)
+    ifm.send_state(ts_bytes + sent_data)
 
 def callback_img(ros_img):
-    global ifm
+    global ifm, gps_time, local_time
+    if local_time is None: return
+    delta_t = time.time() - local_time
+    # print(delta_t, gps_time)
+
+    delta_t = int(delta_t* 1000000000)
+    new_ts = gps_time + delta_t
+    ts_bytes = str(new_ts).ljust(19, "0").encode()
+
     img = np.ndarray(shape=(480, 640, 3), dtype=np.dtype("uint8"), buffer=ros_img.data)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     _, jpeg = cv2.imencode('.jpg', img)
     data = jpeg.tobytes()
-    ifm.send_img(data)
+    ifm.send_img(ts_bytes + data)
     # cv2.imshow('img', img)
     # cv2.waitKey(2)
 
