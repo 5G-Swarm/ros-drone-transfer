@@ -1,6 +1,6 @@
 debug_mode: False
 use_log: True
-robot_id: 3  # 0-9
+robot_id: 4  # 0-9
 
 role_info:
     is_client: True

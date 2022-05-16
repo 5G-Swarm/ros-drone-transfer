@@ -8,7 +8,7 @@ import rospy
 from sensor_msgs.msg import Image, Imu, NavSatFix
 from geometry_msgs.msg import TwistStamped
 from nav_msgs.msg import Odometry
-from proto.python_out import drone_state_msgs_pb2
+from proto.python_out import drone_state_msgs_pb2, drone_cmd_msgs_pb2
 
 from informer import Informer
 
@@ -16,7 +16,11 @@ gps_time = None
 local_time = None
 
 def parse_cmd(message, robot_id):
-    print("Get cmd:", message)
+    print("Get cmd:", message, robot_id)
+    cmd = drone_cmd_msgs_pb2.DroneCmd()
+    cmd.ParseFromString(message)
+    flag = drone_cmd_msgs_pb2.CmdType.Name(cmd.flag)
+    print(cmd.vx, cmd.vy, cmd.vz, cmd.wz, flag)
 
 class Client(Informer):
     def send_img(self, message):
